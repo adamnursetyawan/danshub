@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* [INISIALISASI SUPABASE CLOUD (UBAH BAGIAN INI DENGAN API ANDA)] */
-const supabaseUrl = 'https://uffomcqrutozccbvyiwm.supabase.co/rest/v1/';
+const supabaseUrl = 'https://uffomcqrutozccbvyiwm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZm9tY3FydXRvemNjYnZ5aXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1MjUyNDYsImV4cCI6MjEwMTEwMTI0Nn0.Q--ZdvsaPBLHxYdAUhjhMEMSeI6KE2nM1JQEVtNLtLU';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
