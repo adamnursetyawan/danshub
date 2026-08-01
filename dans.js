@@ -64,16 +64,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* [========================================================================] */
-/* [INISIALISASI SUPABASE CLOUD OTOMATIS SUDAH DIPASANG] */
+/* [INISIALISASI SUPABASE CLOUD DENGAN PELINDUNG ANTI-CRASH] */
 /* [========================================================================] */
 const supabaseUrl = 'https://uffomcqrutozccbvyiwm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZm9tY3FydXRvemNjYnZ5aXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1MjUyNDYsImV4cCI6MjEwMTEwMTI0Nn0.Q--ZdvsaPBLHxYdAUhjhMEMSeI6KE2nM1JQEVtNLtLU';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+let supabase = null;
+if (window.supabase) {
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+}
 
 /* [SISTEM LOGIN ADMIN] */
 let isAdmin = false;
 
 async function checkLogin() {
+    if (!supabase) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
         isAdmin = true;
@@ -95,6 +100,7 @@ async function checkLogin() {
 }
 
 async function loginAdmin() {
+    if (!supabase) return;
     const email = document.getElementById('admin-email').value;
     const password = document.getElementById('admin-pass').value;
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -108,6 +114,7 @@ async function loginAdmin() {
 }
 
 async function logoutAdmin() {
+    if (!supabase) return;
     await supabase.auth.signOut();
     alert('Anda telah keluar.');
     checkLogin();
@@ -116,6 +123,10 @@ async function logoutAdmin() {
 /* [PENGELOLA BOOKMARK CLOUD] */
 async function loadBookmarks() {
     const list = document.getElementById('bookmark-list');
+    if (!supabase) {
+        list.innerHTML = `<span style="color:var(--offline-color);">Cloud tidak terhubung.</span>`;
+        return;
+    }
     const { data, error } = await supabase.from('bookmarks').select('*').order('created_at', { ascending: false });
     
     if (error) {
@@ -135,6 +146,7 @@ async function loadBookmarks() {
 
 async function addBookmark(e) {
     e.preventDefault();
+    if (!supabase) return;
     const name = document.getElementById('bm-name').value;
     const url = document.getElementById('bm-url').value;
     
@@ -144,6 +156,7 @@ async function addBookmark(e) {
 }
 
 async function deleteBookmark(id) {
+    if (!supabase) return;
     if(confirm('Hapus Bookmark?')) {
         await supabase.from('bookmarks').delete().eq('id', id);
         loadBookmarks();
@@ -153,6 +166,7 @@ async function deleteBookmark(id) {
 /* [DAFTAR TODO CLOUD] */
 async function loadTodos() {
     const list = document.getElementById('todo-list');
+    if (!supabase) { list.innerHTML = `<span style="color:var(--offline-color);">Cloud tidak terhubung.</span>`; return; }
     const { data, error } = await supabase.from('todos').select('*').order('created_at', { ascending: false });
     
     if (error) { list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat to-do. (Pastikan tabel sudah dibuat)</span>`; return; }
@@ -176,6 +190,7 @@ async function loadTodos() {
 
 async function addTodo(e) {
     e.preventDefault();
+    if (!supabase) return;
     const text = document.getElementById('todo-input').value;
     await supabase.from('todos').insert([{ text }]);
     e.target.reset();
@@ -183,11 +198,13 @@ async function addTodo(e) {
 }
 
 async function toggleTodo(id, newStatus) {
+    if (!supabase) return;
     await supabase.from('todos').update({ done: newStatus }).eq('id', id);
     loadTodos();
 }
 
 async function deleteTodo(id) {
+    if (!supabase) return;
     await supabase.from('todos').delete().eq('id', id);
     loadTodos();
 }
@@ -195,6 +212,7 @@ async function deleteTodo(id) {
 /* [SISTEM DATABASE MEDIA STORAGE CLOUD] */
 async function loadMedia() {
     const gallery = document.getElementById('media-gallery');
+    if (!supabase) { gallery.innerHTML = '<span style="color:red;">Cloud tidak terhubung.</span>'; return; }
     const { data, error } = await supabase.storage.from('media').list();
     
     if (error) { gallery.innerHTML = '<span style="color:red;">Gagal memuat media. (Pastikan bucket dibuat)</span>'; return; }
@@ -231,6 +249,7 @@ async function loadMedia() {
 
 async function uploadMedia(event) {
     event.preventDefault();
+    if (!supabase) return;
     const fileInput = document.getElementById('media-file');
     const uploadBtn = document.getElementById('upload-btn');
     
@@ -252,6 +271,7 @@ async function uploadMedia(event) {
 }
 
 async function deleteMedia(fileName) {
+    if (!supabase) return;
     if(confirm('Yakin ingin menghapus media ini?')) {
         await supabase.storage.from('media').remove([fileName]);
         loadMedia();
@@ -647,15 +667,18 @@ function getDeviceDiagnostics() {
 
 /* [JALANKAN SELURUH FUNGSI SAAT KODE SELESAI DIMUAT] */
 window.onload = () => {
-    checkLogin();
+    if (supabase) {
+        checkLogin();
+        loadBookmarks();
+        loadTodos();
+        loadMedia();
+    }
+    
     startLiveClock();
     updateNetworkStatus();
     fetchWeather();
     fetchCrypto();
     checkServiceStatus();
-    loadBookmarks();
-    loadTodos();
-    loadMedia();
     fetchNetworkInfo();
     getLocalIP();
     getDeviceDiagnostics();
