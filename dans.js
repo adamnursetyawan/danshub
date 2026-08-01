@@ -68,208 +68,250 @@ const supabaseUrl = 'https://uffomcqrutozccbvyiwm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZm9tY3FydXRvemNjYnZ5aXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1MjUyNDYsImV4cCI6MjEwMTEwMTI0Nn0.Q--ZdvsaPBLHxYdAUhjhMEMSeI6KE2nM1JQEVtNLtLU';
 
 let supabase = null;
-if (window.supabase) {
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+try {
+    if (window.supabase) {
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    }
+} catch (e) {
+    console.warn("Supabase Init Error:", e);
 }
 
 /* [SISTEM LOGIN ADMIN] */
 let isAdmin = false;
 
 async function checkLogin() {
-    if (!supabase) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-        isAdmin = true;
-        document.body.classList.add('admin-mode');
-        document.getElementById('login-form-container').style.display = 'none';
-        document.getElementById('admin-panel').style.display = 'block';
-        document.getElementById('bm-form').style.display = 'flex';
-        document.getElementById('todo-form').style.display = 'flex';
-        document.getElementById('upload-media-form').style.display = 'flex';
-    } else {
-        isAdmin = false;
-        document.body.classList.remove('admin-mode');
-        document.getElementById('login-form-container').style.display = 'block';
-        document.getElementById('admin-panel').style.display = 'none';
-        document.getElementById('bm-form').style.display = 'none';
-        document.getElementById('todo-form').style.display = 'none';
-        document.getElementById('upload-media-form').style.display = 'none';
+    try {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            isAdmin = true;
+            document.body.classList.add('admin-mode');
+            document.getElementById('login-form-container').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('bm-form').style.display = 'flex';
+            document.getElementById('todo-form').style.display = 'flex';
+            document.getElementById('upload-media-form').style.display = 'flex';
+        } else {
+            isAdmin = false;
+            document.body.classList.remove('admin-mode');
+            document.getElementById('login-form-container').style.display = 'block';
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('bm-form').style.display = 'none';
+            document.getElementById('todo-form').style.display = 'none';
+            document.getElementById('upload-media-form').style.display = 'none';
+        }
+    } catch (err) {
+        console.error("Check Login Error:", err);
     }
 }
 
 async function loginAdmin() {
-    if (!supabase) return;
-    const email = document.getElementById('admin-email').value;
-    const password = document.getElementById('admin-pass').value;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-        alert('Gagal Login: ' + error.message);
-    } else {
-        alert('Login Berhasil!');
-        checkLogin();
+    try {
+        if (!supabase) return;
+        const email = document.getElementById('admin-email').value;
+        const password = document.getElementById('admin-pass').value;
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+            alert('Gagal Login: ' + error.message);
+        } else {
+            alert('Login Berhasil!');
+            checkLogin();
+        }
+    } catch (err) {
+        alert('Terjadi kesalahan saat login.');
     }
 }
 
 async function logoutAdmin() {
-    if (!supabase) return;
-    await supabase.auth.signOut();
-    alert('Anda telah keluar.');
-    checkLogin();
+    try {
+        if (!supabase) return;
+        await supabase.auth.signOut();
+        alert('Anda telah keluar.');
+        checkLogin();
+    } catch (err) {
+        console.error("Logout Error:", err);
+    }
 }
 
-/* [PENGELOLA BOOKMARK CLOUD - SESUAI KOLOM NAME] */
+/* [PENGELOLA BOOKMARK CLOUD] */
 async function loadBookmarks() {
     const list = document.getElementById('bookmark-list');
     if (!supabase) { list.innerHTML = `<span style="color:var(--offline-color);">Cloud tidak terhubung.</span>`; return; }
-    const { data, error } = await supabase.from('bookmarks').select('*');
-    
-    if (error) {
-        list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat bookmark.</span>`;
-        return;
+    try {
+        const { data, error } = await supabase.from('bookmarks').select('*');
+        if (error) {
+            list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat bookmark.</span>`;
+            return;
+        }
+        list.innerHTML = '';
+        data.forEach((bm) => {
+            list.innerHTML += `
+                <div class="bm-item">
+                    <a href="${bm.url}" target="_blank" style="color:inherit; text-decoration:none;"><i class="fas fa-link"></i> ${bm.name}</a>
+                    <button class="btn-del" onclick="deleteBookmark('${bm.name}')"><i class="fas fa-times"></i></button>
+                </div>`;
+        });
+    } catch (err) {
+        list.innerHTML = `<span style="color:var(--offline-color);">Error koneksi bookmark.</span>`;
     }
-    
-    list.innerHTML = '';
-    data.forEach((bm) => {
-        list.innerHTML += `
-            <div class="bm-item">
-                <a href="${bm.url}" target="_blank" style="color:inherit; text-decoration:none;"><i class="fas fa-link"></i> ${bm.name}</a>
-                <button class="btn-del" onclick="deleteBookmark('${bm.name}')"><i class="fas fa-times"></i></button>
-            </div>`;
-    });
 }
 
 async function addBookmark(e) {
     e.preventDefault();
     if (!supabase) return;
-    const name = document.getElementById('bm-name').value;
-    const url = document.getElementById('bm-url').value;
-    
-    await supabase.from('bookmarks').insert([{ name, url }]);
-    e.target.reset();
-    loadBookmarks();
+    try {
+        const name = document.getElementById('bm-name').value;
+        const url = document.getElementById('bm-url').value;
+        await supabase.from('bookmarks').insert([{ name, url }]);
+        e.target.reset();
+        loadBookmarks();
+    } catch (err) {
+        alert("Gagal menambah bookmark.");
+    }
 }
 
 async function deleteBookmark(name) {
     if (!supabase) return;
-    if(confirm('Hapus Bookmark?')) {
-        await supabase.from('bookmarks').delete().eq('name', name);
-        loadBookmarks();
+    try {
+        if(confirm('Hapus Bookmark?')) {
+            await supabase.from('bookmarks').delete().eq('name', name);
+            loadBookmarks();
+        }
+    } catch (err) {
+        alert("Gagal menghapus bookmark.");
     }
 }
 
-/* [DAFTAR TODO CLOUD - SESUAI KOLOM TEXT] */
+/* [DAFTAR TODO CLOUD] */
 async function loadTodos() {
     const list = document.getElementById('todo-list');
     if (!supabase) { list.innerHTML = `<span style="color:var(--offline-color);">Cloud tidak terhubung.</span>`; return; }
-    const { data, error } = await supabase.from('todos').select('*');
-    
-    if (error) { list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat to-do.</span>`; return; }
-    list.innerHTML = '';
-    
-    if (data.length === 0) list.innerHTML = '<li style="font-size:0.8rem; color:var(--text-muted);">Tidak ada catatan.</li>';
-    data.forEach((todo) => {
-        const checked = todo.done ? 'checked' : '';
-        const doneClass = todo.done ? 'done' : '';
-        const disabledCheck = isAdmin ? '' : 'disabled';
-        list.innerHTML += `
-            <li class="todo-item ${doneClass}">
-                <div>
-                    <input type="checkbox" ${checked} ${disabledCheck} onchange="toggleTodo('${todo.text}', ${!todo.done})" style="margin-right:8px; cursor:pointer;">
-                    <span>${todo.text}</span>
-                </div>
-                <button class="btn-del" onclick="deleteTodo('${todo.text}')"><i class="fas fa-trash"></i></button>
-            </li>`;
-    });
+    try {
+        const { data, error } = await supabase.from('todos').select('*');
+        if (error) { list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat to-do.</span>`; return; }
+        list.innerHTML = '';
+        if (data.length === 0) list.innerHTML = '<li style="font-size:0.8rem; color:var(--text-muted);">Tidak ada catatan.</li>';
+        data.forEach((todo) => {
+            const checked = todo.done ? 'checked' : '';
+            const doneClass = todo.done ? 'done' : '';
+            const disabledCheck = isAdmin ? '' : 'disabled';
+            list.innerHTML += `
+                <li class="todo-item ${doneClass}">
+                    <div>
+                        <input type="checkbox" ${checked} ${disabledCheck} onchange="toggleTodo('${todo.text}', ${!todo.done})" style="margin-right:8px; cursor:pointer;">
+                        <span>${todo.text}</span>
+                    </div>
+                    <button class="btn-del" onclick="deleteTodo('${todo.text}')"><i class="fas fa-trash"></i></button>
+                </li>`;
+        });
+    } catch (err) {
+        list.innerHTML = `<span style="color:var(--offline-color);">Error koneksi to-do.</span>`;
+    }
 }
 
 async function addTodo(e) {
     e.preventDefault();
     if (!supabase) return;
-    const text = document.getElementById('todo-input').value;
-    await supabase.from('todos').insert([{ text, done: false }]);
-    e.target.reset();
-    loadTodos();
+    try {
+        const text = document.getElementById('todo-input').value;
+        await supabase.from('todos').insert([{ text, done: false }]);
+        e.target.reset();
+        loadTodos();
+    } catch (err) {
+        alert("Gagal menambah tugas.");
+    }
 }
 
 async function toggleTodo(text, newStatus) {
     if (!supabase) return;
-    await supabase.from('todos').update({ done: newStatus }).eq('text', text);
-    loadTodos();
+    try {
+        await supabase.from('todos').update({ done: newStatus }).eq('text', text);
+        loadTodos();
+    } catch (err) {
+        console.error("Toggle error:", err);
+    }
 }
 
 async function deleteTodo(text) {
     if (!supabase) return;
-    await supabase.from('todos').delete().eq('text', text);
-    loadTodos();
+    try {
+        await supabase.from('todos').delete().eq('text', text);
+        loadTodos();
+    } catch (err) {
+        console.error("Delete error:", err);
+    }
 }
 
 /* [SISTEM DATABASE MEDIA STORAGE CLOUD] */
 async function loadMedia() {
     const gallery = document.getElementById('media-gallery');
     if (!supabase) { gallery.innerHTML = '<span style="color:red;">Cloud tidak terhubung.</span>'; return; }
-    const { data, error } = await supabase.storage.from('media').list();
-    
-    if (error) { gallery.innerHTML = '<span style="color:red;">Gagal memuat media. Cek Policy Storage!</span>'; return; }
-    
-    gallery.innerHTML = '';
-    if(data.length === 0 || (data.length === 1 && data[0].name === '.emptyFolderPlaceholder')) {
-        gallery.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted); grid-column: 1 / -1; text-align:center;">Belum ada media di database.</span>';
-        return;
-    }
-
-    data.forEach(file => {
-        if(file.name === '.emptyFolderPlaceholder') return;
-        
-        const { data: publicUrlData } = supabase.storage.from('media').getPublicUrl(file.name);
-        const url = publicUrlData.publicUrl;
-        
-        const item = document.createElement('div');
-        item.className = 'media-item';
-        
-        if(file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-            item.innerHTML = `<img src="${url}" alt="media">`;
-        } else if (file.name.match(/\.(mp4|webm)$/i)) {
-            item.innerHTML = `<video src="${url}" controls></video>`;
-        } else if (file.name.match(/\.(mp3|wav|ogg)$/i)) {
-            item.innerHTML = `<audio src="${url}" controls></audio>`;
-        } else {
-            item.innerHTML = `<a href="${url}" target="_blank" style="font-size:0.7rem;">${file.name}</a>`;
+    try {
+        const { data, error } = await supabase.storage.from('media').list();
+        if (error) { gallery.innerHTML = '<span style="color:red;">Gagal memuat media.</span>'; return; }
+        gallery.innerHTML = '';
+        if(data.length === 0 || (data.length === 1 && data[0].name === '.emptyFolderPlaceholder')) {
+            gallery.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted); grid-column: 1 / -1; text-align:center;">Belum ada media di database.</span>';
+            return;
         }
-
-        item.innerHTML += `<button class="delete-media" onclick="deleteMedia('${file.name}')"><i class="fas fa-trash"></i></button>`;
-        gallery.appendChild(item);
-    });
+        data.forEach(file => {
+            if(file.name === '.emptyFolderPlaceholder') return;
+            const { data: publicUrlData } = supabase.storage.from('media').getPublicUrl(file.name);
+            const url = publicUrlData.publicUrl;
+            const item = document.createElement('div');
+            item.className = 'media-item';
+            if(file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                item.innerHTML = `<img src="${url}" alt="media">`;
+            } else if (file.name.match(/\.(mp4|webm)$/i)) {
+                item.innerHTML = `<video src="${url}" controls></video>`;
+            } else if (file.name.match(/\.(mp3|wav|ogg)$/i)) {
+                item.innerHTML = `<audio src="${url}" controls></audio>`;
+            } else {
+                item.innerHTML = `<a href="${url}" target="_blank" style="font-size:0.7rem;">${file.name}</a>`;
+            }
+            item.innerHTML += `<button class="delete-media" onclick="deleteMedia('${file.name}')"><i class="fas fa-trash"></i></button>`;
+            gallery.appendChild(item);
+        });
+    } catch (err) {
+        gallery.innerHTML = '<span style="color:red;">Error koneksi media.</span>';
+    }
 }
 
 async function uploadMedia(event) {
     event.preventDefault();
     if (!supabase) return;
-    const fileInput = document.getElementById('media-file');
-    const uploadBtn = document.getElementById('upload-btn');
-    
-    if(fileInput.files.length === 0) return;
-    const file = fileInput.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
+    try {
+        const fileInput = document.getElementById('media-file');
+        const uploadBtn = document.getElementById('upload-btn');
+        if(fileInput.files.length === 0) return;
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
 
-    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengunggah...';
-    uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengunggah...';
+        uploadBtn.disabled = true;
 
-    const { error } = await supabase.storage.from('media').upload(fileName, file);
+        const { error } = await supabase.storage.from('media').upload(fileName, file);
+        if (error) { alert('Gagal mengunggah: ' + error.message); } 
+        else { fileInput.value = ''; loadMedia(); }
 
-    if (error) { alert('Gagal mengunggah: ' + error.message); } 
-    else { fileInput.value = ''; loadMedia(); }
-
-    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Unggah';
-    uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Unggah';
+        uploadBtn.disabled = false;
+    } catch (err) {
+        alert("Gagal mengunggah file.");
+    }
 }
 
 async function deleteMedia(fileName) {
     if (!supabase) return;
-    if(confirm('Yakin ingin menghapus media ini?')) {
-        await supabase.storage.from('media').remove([fileName]);
-        loadMedia();
+    try {
+        if(confirm('Yakin ingin menghapus media ini?')) {
+            await supabase.storage.from('media').remove([fileName]);
+            loadMedia();
+        }
+    } catch (err) {
+        alert("Gagal menghapus file.");
     }
 }
 
@@ -368,7 +410,7 @@ function calculateSubnet() {
     const resultBox = document.getElementById('subnet-result');
 
     if (!ipInput.match(/^(\d{1,3}\.){3}\d{1,3}$/) || isNaN(cidr) || cidr < 1 || cidr > 32) {
-        resultBox.innerHTML = "<span style='color:red;'>Format IP atau Prefix salah! (Contoh 192.168.1.1 dan 24)</span>";
+        resultBox.innerHTML = "<span style='color:red;'>Format IP atau Prefix salah!</span>";
         resultBox.style.display = 'block';
         return;
     }
@@ -381,7 +423,6 @@ function calculateSubnet() {
     const broadInt = netInt | ~mask;
 
     const toIP = (int) => [(int >>> 24) & 255, (int >>> 16) & 255, (int >>> 8) & 255, int & 255].join('.');
-    
     const totalHosts = (cidr === 31 || cidr === 32) ? 0 : Math.pow(2, 32 - cidr) - 2;
 
     resultBox.style.display = 'block';
@@ -393,44 +434,48 @@ function calculateSubnet() {
     `;
 }
 
-/* [INFORMASI SISTEM PERANGKAT] */
+/* [INFORMASI SISTEM PERANGKAT AMAN] */
 function getAdvancedSystemInfo() {
-    const ramEl = document.getElementById('sys-ram');
-    if (navigator.deviceMemory) {
-        ramEl.innerText = navigator.deviceMemory + ' GB (Estimasi)';
-    } else {
-        ramEl.innerText = 'Tidak Didukung';
-    }
-
-    const batEl = document.getElementById('sys-battery');
-    if ('getBattery' in navigator) {
-        navigator.getBattery().then(function(battery) {
-            function updateBatteryStatus() {
-                const level = Math.round(battery.level * 100) + '%';
-                const charging = battery.charging ? ' (⚡ Mengisi)' : '';
-                batEl.innerText = level + charging;
-            }
-            updateBatteryStatus();
-            battery.addEventListener('levelchange', updateBatteryStatus);
-            battery.addEventListener('chargingchange', updateBatteryStatus);
-        });
-    } else {
-        batEl.innerText = 'Tidak Didukung';
-    }
-
-    const connEl = document.getElementById('sys-conn');
-    const downEl = document.getElementById('sys-downlink');
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (connection) {
-        function updateConnectionStatus() {
-            connEl.innerText = connection.effectiveType ? connection.effectiveType.toUpperCase() : 'Tidak Diketahui';
-            downEl.innerText = connection.downlink ? connection.downlink + ' Mbps' : 'Tidak Diketahui';
+    try {
+        const ramEl = document.getElementById('sys-ram');
+        if (navigator.deviceMemory) {
+            ramEl.innerText = navigator.deviceMemory + ' GB (Estimasi)';
+        } else {
+            ramEl.innerText = 'Tidak Didukung';
         }
-        updateConnectionStatus();
-        connection.addEventListener('change', updateConnectionStatus);
-    } else {
-        connEl.innerText = 'Tidak Didukung';
-        downEl.innerText = 'Tidak Didukung';
+
+        const batEl = document.getElementById('sys-battery');
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(function(battery) {
+                function updateBatteryStatus() {
+                    const level = Math.round(battery.level * 100) + '%';
+                    const charging = battery.charging ? ' (⚡ Mengisi)' : '';
+                    batEl.innerText = level + charging;
+                }
+                updateBatteryStatus();
+                battery.addEventListener('levelchange', updateBatteryStatus);
+                battery.addEventListener('chargingchange', updateBatteryStatus);
+            }).catch(() => { batEl.innerText = 'Tidak Didukung'; });
+        } else {
+            batEl.innerText = 'Tidak Didukung';
+        }
+
+        const connEl = document.getElementById('sys-conn');
+        const downEl = document.getElementById('sys-downlink');
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (connection) {
+            function updateConnectionStatus() {
+                connEl.innerText = connection.effectiveType ? connection.effectiveType.toUpperCase() : 'Tidak Diketahui';
+                downEl.innerText = connection.downlink ? connection.downlink + ' Mbps' : 'Tidak Diketahui';
+            }
+            updateConnectionStatus();
+            connection.addEventListener('change', updateConnectionStatus);
+        } else {
+            connEl.innerText = 'Tidak Didukung';
+            downEl.innerText = 'Tidak Didukung';
+        }
+    } catch (e) {
+        console.log("System info skipped");
     }
 }
 
@@ -579,9 +624,10 @@ function shareResult() {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
 }
 
-/* [WAKTU LOKASI DAN INFORMASI PERANGKAT DASAR] */
+/* [WAKTU LOKASI DAN INFORMASI PERANGKAT] */
 function startLiveClock() {
     const clockEl = document.getElementById('live-clock');
+    if (!clockEl) return;
     setInterval(() => {
         const now = new Date();
         clockEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
@@ -590,6 +636,7 @@ function startLiveClock() {
 
 function updateNetworkStatus() {
     const statusDot = document.getElementById('network-status');
+    if (!statusDot) return;
     if (navigator.onLine) {
         statusDot.className = 'status-dot online';
         statusDot.title = 'Terhubung ke Internet';
@@ -614,59 +661,63 @@ async function fetchNetworkInfo() {
 }
 
 function getLocalIP() {
-    window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-    if (!window.RTCPeerConnection) {
-        document.getElementById('local-ip').innerText = "Tidak Didukung Browser"; return;
-    }
-    const pc = new RTCPeerConnection({iceServers: []});
-    const noop = () => {};
-    let localIP = "Mendeteksi...";
-
-    pc.createDataChannel("");
-    pc.createOffer(pc.setLocalDescription.bind(pc), noop);
-    pc.onicecandidate = function(ice) {
-        if (ice && ice.candidate && ice.candidate.candidate) {
-            const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/; 
-            const match = ipRegex.exec(ice.candidate.candidate);
-            if (match) {
-                localIP = match[1];
-                document.getElementById('local-ip').innerText = localIP;
-                pc.onicecandidate = noop; 
-            }
+    try {
+        window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+        if (!window.RTCPeerConnection) {
+            document.getElementById('local-ip').innerText = "Tidak Didukung"; return;
         }
-    };
-    
-    setTimeout(() => {
-        const el = document.getElementById('local-ip');
-        if (el.innerText === 'Mendeteksi...') { el.innerText = 'Disembunyikan (Privasi Browser)'; }
-    }, 2000);
+        const pc = new RTCPeerConnection({iceServers: []});
+        const noop = () => {};
+        let localIP = "Mendeteksi...";
+
+        pc.createDataChannel("");
+        pc.createOffer(pc.setLocalDescription.bind(pc), noop);
+        pc.onicecandidate = function(ice) {
+            if (ice && ice.candidate && ice.candidate.candidate) {
+                const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/; 
+                const match = ipRegex.exec(ice.candidate.candidate);
+                if (match) {
+                    localIP = match[1];
+                    document.getElementById('local-ip').innerText = localIP;
+                    pc.onicecandidate = noop; 
+                }
+            }
+        };
+        setTimeout(() => {
+            const el = document.getElementById('local-ip');
+            if (el && el.innerText === 'Mendeteksi...') { el.innerText = 'Disembunyikan'; }
+        }, 2000);
+    } catch (e) {
+        document.getElementById('local-ip').innerText = "Tidak Didukung";
+    }
 }
 
 function getDeviceDiagnostics() {
-    const ua = navigator.userAgent;
-    let browser = "Browser Lain"; let os = "OS Lain";
+    try {
+        const ua = navigator.userAgent;
+        let browser = "Browser Lain"; let os = "OS Lain";
 
-    if (ua.includes("Firefox")) browser = "Mozilla Firefox";
-    else if (ua.includes("Edg")) browser = "Microsoft Edge";
-    else if (ua.includes("Chrome")) browser = "Google Chrome";
-    else if (ua.includes("Safari")) browser = "Apple Safari";
-    
-    if (ua.includes("Win")) os = "Windows";
-    else if (ua.includes("Mac")) os = "MacOS";
-    else if (ua.includes("Android")) os = "Android";
-    else if (ua.includes("Linux")) os = "Linux";
-    else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+        if (ua.includes("Firefox")) browser = "Mozilla Firefox";
+        else if (ua.includes("Edg")) browser = "Microsoft Edge";
+        else if (ua.includes("Chrome")) browser = "Google Chrome";
+        else if (ua.includes("Safari")) browser = "Apple Safari";
+        
+        if (ua.includes("Win")) os = "Windows";
+        else if (ua.includes("Mac")) os = "MacOS";
+        else if (ua.includes("Android")) os = "Android";
+        else if (ua.includes("Linux")) os = "Linux";
+        else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
 
-    document.getElementById('device-info').innerHTML = `<i class="fas fa-laptop-code"></i> Perangkat: <strong>${os}</strong> | <strong>${browser}</strong>`;
+        document.getElementById('device-info').innerHTML = `<i class="fas fa-laptop-code"></i> Perangkat: <strong>${os}</strong> | <strong>${browser}</strong>`;
+    } catch (e) {
+        console.log("Device info error");
+    }
 }
 
-/* [JALANKAN SELURUH FUNGSI DENGAN AMAN AGAR TIDAK STUCK] */
+/* [JALANKAN SELURUH FUNGSI DENGAN AMAN] */
 window.onload = () => {
-    // Jalankan jam digital duluan agar langsung hidup
     startLiveClock();
     updateNetworkStatus();
-
-    // Jalankan fitur lokal yang tidak bikin stuck
     fetchWeather();
     fetchCrypto();
     checkServiceStatus();
@@ -675,11 +726,10 @@ window.onload = () => {
     getDeviceDiagnostics();
     getAdvancedSystemInfo(); 
 
-    // Jalankan fitur Cloud (Supabase) secara terpisah di latar belakang
     if (supabase) {
-        checkLogin().catch(err => console.log("Cloud login check skipped"));
-        loadBookmarks().catch(err => console.log("Cloud bookmarks skipped"));
-        loadTodos().catch(err => console.log("Cloud todos skipped"));
-        loadMedia().catch(err => console.log("Cloud media skipped"));
+        checkLogin();
+        loadBookmarks();
+        loadTodos();
+        loadMedia();
     }
 };
