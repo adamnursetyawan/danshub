@@ -1,4 +1,4 @@
-/* [EFEK KURSOR KUSTOM (PENGIKUT TETIKUS/MOUSE)] */
+/* [EFEK KURSOR KUSTOM PENGIKUT TETIKUS ATAU MOUSE] */
 const dot = document.getElementById("cursor-dot");
 const outline = document.getElementById("cursor-outline");
 window.addEventListener("mousemove", function(e) {
@@ -15,7 +15,7 @@ document.querySelectorAll('a, button, input, select, summary').forEach(el => {
     el.addEventListener('mouseleave', () => { document.body.classList.remove('cursor-hover'); });
 });
 
-/* [NAVIGASI LACI (DRAWER) & TOMBOL KEMBALI KE ATAS] */
+/* [NAVIGASI LACI DRAWER DAN TOMBOL KEMBALI KE ATAS] */
 const menuBtn = document.getElementById('menu-btn');
 const closeBtn = document.getElementById('close-btn');
 const drawer = document.getElementById('side-drawer');
@@ -39,7 +39,7 @@ window.addEventListener('scroll', () => {
 });
 backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-/* [SISTEM TEMA GELAP (DARK MODE)] */
+/* [SISTEM TEMA GELAP DARK MODE] */
 const themeBtn = document.getElementById('theme-btn');
 const themeIcon = themeBtn.querySelector('i');
 themeBtn.addEventListener('click', () => {
@@ -52,7 +52,7 @@ themeBtn.addEventListener('click', () => {
     updateCircle(parseFloat(document.getElementById('main-speed').innerText) || 0);
 });
 
-/* [ANIMASI MUNCUL SAAT DI-SCROLL] */
+/* [ANIMASI MUNCUL SAAT DI SCROLL] */
 document.addEventListener('DOMContentLoaded', () => {
     const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -20px 0px" };
     const observer = new IntersectionObserver((entries) => {
@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.animate-on-scroll').forEach(el => { observer.observe(el); });
 });
 
-/* [INISIALISASI SUPABASE CLOUD (UBAH BAGIAN INI DENGAN API ANDA)] */
+/* [========================================================================] */
+/* [INISIALISASI SUPABASE CLOUD OTOMATIS SUDAH DIPASANG] */
+/* [========================================================================] */
 const supabaseUrl = 'https://uffomcqrutozccbvyiwm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZm9tY3FydXRvemNjYnZ5aXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1MjUyNDYsImV4cCI6MjEwMTEwMTI0Nn0.Q--ZdvsaPBLHxYdAUhjhMEMSeI6KE2nM1JQEVtNLtLU';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -111,13 +113,13 @@ async function logoutAdmin() {
     checkLogin();
 }
 
-/* [PENGELOLA BOOKMARK (CLOUD)] */
+/* [PENGELOLA BOOKMARK CLOUD] */
 async function loadBookmarks() {
     const list = document.getElementById('bookmark-list');
     const { data, error } = await supabase.from('bookmarks').select('*').order('created_at', { ascending: false });
     
     if (error) {
-        list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat bookmark.</span>`;
+        list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat bookmark. (Pastikan tabel sudah dibuat)</span>`;
         return;
     }
     
@@ -148,19 +150,19 @@ async function deleteBookmark(id) {
     }
 }
 
-/* [DAFTAR TO-DO (CLOUD)] */
+/* [DAFTAR TODO CLOUD] */
 async function loadTodos() {
     const list = document.getElementById('todo-list');
     const { data, error } = await supabase.from('todos').select('*').order('created_at', { ascending: false });
     
-    if (error) { list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat to-do.</span>`; return; }
+    if (error) { list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat to-do. (Pastikan tabel sudah dibuat)</span>`; return; }
     list.innerHTML = '';
     
     if (data.length === 0) list.innerHTML = '<li style="font-size:0.8rem; color:var(--text-muted);">Tidak ada catatan.</li>';
     data.forEach((todo) => {
         const checked = todo.done ? 'checked' : '';
         const doneClass = todo.done ? 'done' : '';
-        const disabledCheck = isAdmin ? '' : 'disabled'; // [HANYA ADMIN YANG BISA CENTANG]
+        const disabledCheck = isAdmin ? '' : 'disabled';
         list.innerHTML += `
             <li class="todo-item ${doneClass}">
                 <div>
@@ -190,12 +192,12 @@ async function deleteTodo(id) {
     loadTodos();
 }
 
-/* [SISTEM DATABASE MEDIA STORAGE (CLOUD)] */
+/* [SISTEM DATABASE MEDIA STORAGE CLOUD] */
 async function loadMedia() {
     const gallery = document.getElementById('media-gallery');
     const { data, error } = await supabase.storage.from('media').list();
     
-    if (error) { gallery.innerHTML = '<span style="color:red;">Gagal memuat media.</span>'; return; }
+    if (error) { gallery.innerHTML = '<span style="color:red;">Gagal memuat media. (Pastikan bucket dibuat)</span>'; return; }
     
     gallery.innerHTML = '';
     if(data.length === 0 || (data.length === 1 && data[0].name === '.emptyFolderPlaceholder')) {
@@ -212,7 +214,6 @@ async function loadMedia() {
         const item = document.createElement('div');
         item.className = 'media-item';
         
-        // [MENENTUKAN TIPE FILE DARI EKSTENSI]
         if(file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
             item.innerHTML = `<img src="${url}" alt="media">`;
         } else if (file.name.match(/\.(mp4|webm)$/i)) {
@@ -236,7 +237,7 @@ async function uploadMedia(event) {
     if(fileInput.files.length === 0) return;
     const file = fileInput.files[0];
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`; // [BUAT NAMA ACAK]
+    const fileName = `${Math.random()}.${fileExt}`;
 
     uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengunggah...';
     uploadBtn.disabled = true;
@@ -282,7 +283,7 @@ async function fetchWeather() {
     }
 }
 
-/* [WIDGET KURS & KRIPTO MINI] */
+/* [WIDGET KURS DAN KRIPTO MINI] */
 async function fetchCrypto() {
     try {
         const resUsd = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -352,7 +353,7 @@ function calculateSubnet() {
     const resultBox = document.getElementById('subnet-result');
 
     if (!ipInput.match(/^(\d{1,3}\.){3}\d{1,3}$/) || isNaN(cidr) || cidr < 1 || cidr > 32) {
-        resultBox.innerHTML = "<span style='color:red;'>Format IP atau Prefix salah! (Contoh: 192.168.1.1 dan 24)</span>";
+        resultBox.innerHTML = "<span style='color:red;'>Format IP atau Prefix salah! (Contoh 192.168.1.1 dan 24)</span>";
         resultBox.style.display = 'block';
         return;
     }
@@ -437,7 +438,7 @@ function copyColorPicker() {
     }
 }
 
-/* [LOGIKA PENCARIAN GOOGLE & URL] */
+/* [LOGIKA PENCARIAN GOOGLE DAN URL] */
 function handleSearch(event) {
     event.preventDefault(); 
     const input = document.getElementById('search-input').value.trim();
@@ -563,7 +564,7 @@ function shareResult() {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
 }
 
-/* [WAKTU, LOKASI & INFORMASI PERANGKAT DASAR] */
+/* [WAKTU LOKASI DAN INFORMASI PERANGKAT DASAR] */
 function startLiveClock() {
     const clockEl = document.getElementById('live-clock');
     setInterval(() => {
@@ -646,15 +647,15 @@ function getDeviceDiagnostics() {
 
 /* [JALANKAN SELURUH FUNGSI SAAT KODE SELESAI DIMUAT] */
 window.onload = () => {
-    checkLogin(); /* [CEK LOGIN TERLEBIH DAHULU] */
+    checkLogin();
     startLiveClock();
     updateNetworkStatus();
     fetchWeather();
     fetchCrypto();
     checkServiceStatus();
-    loadBookmarks(); /* [MENGAMBIL DARI SUPABASE] */
-    loadTodos();     /* [MENGAMBIL DARI SUPABASE] */
-    loadMedia();     /* [MENGAMBIL DARI SUPABASE] */
+    loadBookmarks();
+    loadTodos();
+    loadMedia();
     fetchNetworkInfo();
     getLocalIP();
     getDeviceDiagnostics();
