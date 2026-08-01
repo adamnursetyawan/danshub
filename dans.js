@@ -63,9 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.animate-on-scroll').forEach(el => { observer.observe(el); });
 });
 
-/* [========================================================================] */
-/* [INISIALISASI SUPABASE CLOUD DENGAN PELINDUNG ANTI-CRASH] */
-/* [========================================================================] */
+/* [INISIALISASI SUPABASE CLOUD] */
 const supabaseUrl = 'https://uffomcqrutozccbvyiwm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZm9tY3FydXRvemNjYnZ5aXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1MjUyNDYsImV4cCI6MjEwMTEwMTI0Nn0.Q--ZdvsaPBLHxYdAUhjhMEMSeI6KE2nM1JQEVtNLtLU';
 
@@ -120,17 +118,14 @@ async function logoutAdmin() {
     checkLogin();
 }
 
-/* [PENGELOLA BOOKMARK CLOUD] */
+/* [PENGELOLA BOOKMARK CLOUD - SESUAI KOLOM NAME] */
 async function loadBookmarks() {
     const list = document.getElementById('bookmark-list');
-    if (!supabase) {
-        list.innerHTML = `<span style="color:var(--offline-color);">Cloud tidak terhubung.</span>`;
-        return;
-    }
-    const { data, error } = await supabase.from('bookmarks').select('*').order('created_at', { ascending: false });
+    if (!supabase) { list.innerHTML = `<span style="color:var(--offline-color);">Cloud tidak terhubung.</span>`; return; }
+    const { data, error } = await supabase.from('bookmarks').select('*');
     
     if (error) {
-        list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat bookmark. (Pastikan tabel sudah dibuat)</span>`;
+        list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat bookmark.</span>`;
         return;
     }
     
@@ -139,7 +134,7 @@ async function loadBookmarks() {
         list.innerHTML += `
             <div class="bm-item">
                 <a href="${bm.url}" target="_blank" style="color:inherit; text-decoration:none;"><i class="fas fa-link"></i> ${bm.name}</a>
-                <button class="btn-del" onclick="deleteBookmark(${bm.id})"><i class="fas fa-times"></i></button>
+                <button class="btn-del" onclick="deleteBookmark('${bm.name}')"><i class="fas fa-times"></i></button>
             </div>`;
     });
 }
@@ -155,21 +150,21 @@ async function addBookmark(e) {
     loadBookmarks();
 }
 
-async function deleteBookmark(id) {
+async function deleteBookmark(name) {
     if (!supabase) return;
     if(confirm('Hapus Bookmark?')) {
-        await supabase.from('bookmarks').delete().eq('id', id);
+        await supabase.from('bookmarks').delete().eq('name', name);
         loadBookmarks();
     }
 }
 
-/* [DAFTAR TODO CLOUD] */
+/* [DAFTAR TODO CLOUD - SESUAI KOLOM TEXT] */
 async function loadTodos() {
     const list = document.getElementById('todo-list');
     if (!supabase) { list.innerHTML = `<span style="color:var(--offline-color);">Cloud tidak terhubung.</span>`; return; }
-    const { data, error } = await supabase.from('todos').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('todos').select('*');
     
-    if (error) { list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat to-do. (Pastikan tabel sudah dibuat)</span>`; return; }
+    if (error) { list.innerHTML = `<span style="color:var(--offline-color);">Gagal memuat to-do.</span>`; return; }
     list.innerHTML = '';
     
     if (data.length === 0) list.innerHTML = '<li style="font-size:0.8rem; color:var(--text-muted);">Tidak ada catatan.</li>';
@@ -180,10 +175,10 @@ async function loadTodos() {
         list.innerHTML += `
             <li class="todo-item ${doneClass}">
                 <div>
-                    <input type="checkbox" ${checked} ${disabledCheck} onchange="toggleTodo(${todo.id}, ${!todo.done})" style="margin-right:8px; cursor:pointer;">
+                    <input type="checkbox" ${checked} ${disabledCheck} onchange="toggleTodo('${todo.text}', ${!todo.done})" style="margin-right:8px; cursor:pointer;">
                     <span>${todo.text}</span>
                 </div>
-                <button class="btn-del" onclick="deleteTodo(${todo.id})"><i class="fas fa-trash"></i></button>
+                <button class="btn-del" onclick="deleteTodo('${todo.text}')"><i class="fas fa-trash"></i></button>
             </li>`;
     });
 }
@@ -192,20 +187,20 @@ async function addTodo(e) {
     e.preventDefault();
     if (!supabase) return;
     const text = document.getElementById('todo-input').value;
-    await supabase.from('todos').insert([{ text }]);
+    await supabase.from('todos').insert([{ text, done: false }]);
     e.target.reset();
     loadTodos();
 }
 
-async function toggleTodo(id, newStatus) {
+async function toggleTodo(text, newStatus) {
     if (!supabase) return;
-    await supabase.from('todos').update({ done: newStatus }).eq('id', id);
+    await supabase.from('todos').update({ done: newStatus }).eq('text', text);
     loadTodos();
 }
 
-async function deleteTodo(id) {
+async function deleteTodo(text) {
     if (!supabase) return;
-    await supabase.from('todos').delete().eq('id', id);
+    await supabase.from('todos').delete().eq('text', text);
     loadTodos();
 }
 
@@ -215,7 +210,7 @@ async function loadMedia() {
     if (!supabase) { gallery.innerHTML = '<span style="color:red;">Cloud tidak terhubung.</span>'; return; }
     const { data, error } = await supabase.storage.from('media').list();
     
-    if (error) { gallery.innerHTML = '<span style="color:red;">Gagal memuat media. (Pastikan bucket dibuat)</span>'; return; }
+    if (error) { gallery.innerHTML = '<span style="color:red;">Gagal memuat media. Cek Policy Storage!</span>'; return; }
     
     gallery.innerHTML = '';
     if(data.length === 0 || (data.length === 1 && data[0].name === '.emptyFolderPlaceholder')) {
