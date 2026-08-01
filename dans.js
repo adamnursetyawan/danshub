@@ -660,17 +660,13 @@ function getDeviceDiagnostics() {
     document.getElementById('device-info').innerHTML = `<i class="fas fa-laptop-code"></i> Perangkat: <strong>${os}</strong> | <strong>${browser}</strong>`;
 }
 
-/* [JALANKAN SELURUH FUNGSI SAAT KODE SELESAI DIMUAT] */
+/* [JALANKAN SELURUH FUNGSI DENGAN AMAN AGAR TIDAK STUCK] */
 window.onload = () => {
-    if (supabase) {
-        checkLogin();
-        loadBookmarks();
-        loadTodos();
-        loadMedia();
-    }
-    
+    // Jalankan jam digital duluan agar langsung hidup
     startLiveClock();
     updateNetworkStatus();
+
+    // Jalankan fitur lokal yang tidak bikin stuck
     fetchWeather();
     fetchCrypto();
     checkServiceStatus();
@@ -678,4 +674,12 @@ window.onload = () => {
     getLocalIP();
     getDeviceDiagnostics();
     getAdvancedSystemInfo(); 
+
+    // Jalankan fitur Cloud (Supabase) secara terpisah di latar belakang
+    if (supabase) {
+        checkLogin().catch(err => console.log("Cloud login check skipped"));
+        loadBookmarks().catch(err => console.log("Cloud bookmarks skipped"));
+        loadTodos().catch(err => console.log("Cloud todos skipped"));
+        loadMedia().catch(err => console.log("Cloud media skipped"));
+    }
 };
