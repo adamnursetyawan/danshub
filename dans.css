@@ -1,4 +1,4 @@
-/* [PENGATURAN WARNA (TEMA TERANG & GELAP)] */
+/* [PENGATURAN WARNA TEMA TERANG DAN GELAP] */
 :root {
     --bg-grad-1: #D6E4FA; --bg-grad-2: #4C7EBF; --bg-grad-3: #113669;
     --container-bg: rgba(255, 255, 255, 0.98);
@@ -36,7 +36,7 @@ body.dark-mode {
     --modal-overlay: rgba(0, 0, 0, 0.8);
 }
 
-/* [GAYA BILAH GULIR (SCROLLBAR) KUSTOM] */
+/* [GAYA BILAH GULIR SCROLLBAR KUSTOM] */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-bg); transition: background 0.3s; }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; transition: background 0.3s; }
@@ -51,7 +51,7 @@ body.dark-mode {
     .cursor-hover .cursor-outline { width: 50px; height: 50px; background: rgba(145, 115, 177, 0.2); border-color: #9173B1; }
 }
 
-/* [RESET & PENGATURAN DASAR] */
+/* [RESET DAN PENGATURAN DASAR] */
 html { scroll-behavior: smooth; }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
 
@@ -64,7 +64,7 @@ body {
     background-attachment: fixed;
 }
 
-/* [ANIMASI KUNCI (KEYFRAMES)] */
+/* [ANIMASI KUNCI KEYFRAMES] */
 @keyframes fadeUpIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
 
@@ -85,7 +85,7 @@ body {
 .animate-on-scroll { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .animate-on-scroll.animate { animation: slideUpFade 0.6s ease forwards; }
 
-/* [TOMBOL MELAYANG (MENU, TEMA, PROFIL DEV)] */
+/* [TOMBOL MELAYANG MENU TEMA PROFIL DEV] */
 .floating-controls { position: fixed; top: 25px; right: 25px; display: flex; flex-direction: column; gap: 12px; z-index: 1000; }
 .control-btn { background: var(--btn-float-bg); color: var(--btn-float-icon); border: none; font-size: 20px; width: 45px; height: 45px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; transition: all 0.3s ease; cursor: pointer; text-decoration: none; }
 .control-btn:hover { transform: scale(1.05); background: var(--container-bg); }
@@ -105,7 +105,7 @@ body {
 .drawer-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(3px); z-index: 1001; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s; }
 .drawer-overlay.open { opacity: 1; visibility: visible; }
 
-/* [BAGIAN JUDUL & JAM DIGITAL] */
+/* [BAGIAN JUDUL DAN JAM DIGITAL] */
 .header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--heading-color); }
 .header h1 i { color: #4C7EBF; }
 .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; transition: 0.3s ease; margin-left: 5px; }
@@ -114,7 +114,7 @@ body {
 .header p { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 15px; }
 .live-clock { font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: bold; color: #4C7EBF; margin-bottom: 15px; line-height: 1.2; background: rgba(76, 126, 191, 0.1); display: inline-block; padding: 5px 15px; border-radius: 20px; border: 1px solid var(--border-color); }
 
-/* [KOTAK INFORMASI JARINGAN (IP)] */
+/* [KOTAK INFORMASI JARINGAN IP] */
 .network-info { background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 16px; font-size: 0.8rem; color: var(--text-main); margin-bottom: 20px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
 .network-info span { color: var(--text-muted); font-weight: 600; width: 140px; display: inline-block;}
 .network-info i { color: #4C7EBF; width: 15px;}
@@ -132,7 +132,7 @@ body {
 .weather-temp { font-size: 1.8rem; font-weight: 700; color: var(--text-main); line-height: 1; }
 .weather-desc { font-size: 0.8rem; color: var(--text-muted); }
 
-/* [WIDGET KRIPTO & KURS] */
+/* [WIDGET KRIPTO DAN KURS] */
 .crypto-grid { display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap; margin-top: 10px; }
 .crypto-item { background: var(--circle-bg); border-radius: 12px; padding: 12px; flex: 1; min-width: 90px; text-align: center; display: flex; flex-direction: column; gap: 5px; transition: transform 0.3s; border: 1px solid transparent; }
 .crypto-item:hover { transform: translateY(-3px); border-color: var(--border-color); }
@@ -147,7 +147,7 @@ body {
 .badge-offline { background: rgba(255, 71, 87, 0.2); color: #ff4757; }
 .badge-checking { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
 
-/* [WIDGET PENGELOLA MARKA BUKU (BOOKMARK)] */
+/* [WIDGET PENGELOLA MARKA BUKU BOOKMARK] */
 .bookmark-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;}
 .bm-item { background: var(--circle-bg); color: var(--text-main); text-decoration: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; border: 1px solid transparent;}
 .bm-item:hover { border-color: #4C7EBF; transform: translateY(-2px); }
@@ -155,16 +155,16 @@ body {
 .bm-input { flex: 1 1 120px; min-width: 0; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--container-bg); color: var(--text-main); outline: none; font-size: 0.8rem;}
 .btn-small { background: var(--btn-bg); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: 0.3s; flex-shrink: 0; }
 .btn-small:hover { background: var(--btn-hover); }
-.btn-del { background: transparent; color: var(--offline-color); border: none; cursor: pointer; padding: 2px 5px; border-radius: 4px; display: none; /* [DISEMBUNYIKAN SEBELUM LOGIN] */ }
+.btn-del { background: transparent; color: var(--offline-color); border: none; cursor: pointer; padding: 2px 5px; border-radius: 4px; display: none; }
 .btn-del:hover { background: rgba(255, 71, 87, 0.1); }
-.admin-mode .btn-del { display: block; /* [DIMUNCULKAN SAAT LOGIN] */ }
+.admin-mode .btn-del { display: block; }
 
-/* [WIDGET DAFTAR (TO-DO)] */
+/* [WIDGET DAFTAR TODO] */
 .todo-list { list-style: none; margin-top: 10px; max-height: 150px; overflow-y: auto; padding-right: 5px;}
 .todo-item { display: flex; justify-content: space-between; align-items: center; background: var(--container-bg); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; border: 1px solid var(--border-color); }
 .todo-item.done span { text-decoration: line-through; color: var(--text-muted); }
 
-/* [WIDGET PEMBUAT KATA SANDI (GENERATOR)] */
+/* [WIDGET PEMBUAT KATA SANDI GENERATOR] */
 .pass-box-container { display: flex; gap: 8px; margin-bottom: 10px; }
 .pass-input { flex: 1; padding: 10px 15px; border-radius: 8px; border: 1px dashed var(--border-color); background: var(--container-bg); color: var(--text-main); outline: none; font-family: 'Space Mono', monospace; font-size: 0.9rem; font-weight: bold; letter-spacing: 1px; text-align: center;}
 .pass-controls { display: flex; align-items: center; gap: 15px; font-size: 0.85rem; color: var(--text-muted); background: var(--circle-bg); padding: 10px; border-radius: 8px;}
@@ -181,9 +181,9 @@ body {
 .media-item img, .media-item video { width: 100%; height: 100%; object-fit: cover; }
 .media-item audio { width: 100%; height: 40px; margin: 10px; }
 .media-item .delete-media { position: absolute; top: 5px; right: 5px; background: rgba(255, 71, 87, 0.8); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; display: none; justify-content: center; align-items: center; cursor: pointer; font-size: 0.7rem; }
-.admin-mode .delete-media { display: flex; /* [DIMUNCULKAN SAAT LOGIN] */ }
+.admin-mode .delete-media { display: flex; }
 
-/* [PERBAIKAN RESPONSIF (BUG OVERFLOW HP & DESKTOP)] */
+/* [PERBAIKAN RESPONSIF BUG OVERFLOW HP DAN DESKTOP] */
 @media (max-width: 500px) {
     .bm-add-form { flex-direction: column; }
     .bm-add-form .bm-input { width: 100%; flex: none; }
@@ -194,7 +194,7 @@ body {
     .dashboard { padding: 30px 20px 20px 20px; }
 }
 
-/* [KOTAK PENCARIAN GOOGLE & URL] */
+/* [KOTAK PENCARIAN GOOGLE DAN URL] */
 .search-container { margin-bottom: 20px; }
 .search-container form { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 50px; padding: 6px 18px; transition: all 0.3s ease; }
 .search-container form:focus-within { border-color: #4C7EBF; box-shadow: 0 0 0 3px rgba(76, 126, 191, 0.15); }
@@ -212,7 +212,7 @@ body {
 .shortcut-btn.ig:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #ffffff; border-color: transparent;}
 .shortcut-btn.router:hover { background: #10b981; color: #ffffff; border-color: transparent;}
 
-/* [PEMILIH SERVER & LINGKARAN KECEPATAN] */
+/* [PEMILIH SERVER DAN LINGKARAN KECEPATAN] */
 .server-selector { text-align: left; margin-bottom: 25px; }
 .server-selector label { font-size: 0.8rem; font-weight: 600; color: var(--heading-color); display: block; margin-bottom: 8px; }
 .server-selector select { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); outline: none; font-size: 0.85rem; font-family: 'Poppins', sans-serif;}
@@ -224,7 +224,7 @@ body {
 .speed-value { font-size: 2.8rem; font-weight: 700; line-height: 1; color: var(--text-main); margin-top: 5px; }
 .speed-unit { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); margin-top: 2px; }
 
-/* [KISI (GRID) STATISTIK HASIL TES] */
+/* [KISI GRID STATISTIK HASIL TES] */
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
 .stat-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px 5px; transition: transform 0.3s; text-align: center;}
 .stat-box:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -247,24 +247,4 @@ summary::-webkit-details-marker { display: none; }
 .btn-clear:hover { transform: scale(1.1); }
 .history-list { padding: 0 15px 15px 15px; list-style: none; font-size: 0.8rem; color: var(--text-muted); border-top: 1px dashed var(--border-color); padding-top: 10px; max-height: 150px; overflow-y: auto; }
 .history-list li { margin-bottom: 8px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px;}
-.history-list li:last-child { border: none; margin: 0; padding: 0;}
-
-.drive-widget iframe { width: 100%; height: 250px; border: none; border-radius: 12px; background: #ffffff; margin-top: 10px;}
-.spotify-container { width: 100%; margin-top: 10px; margin-bottom: 25px; transition: all 0.3s ease; }
-.spotify-container:hover { transform: translateY(-2px); }
-
-/* [INFO PERANGKAT BAGIAN BAWAH (FOOTER)] */
-.device-info { font-size: 0.7rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 10px; font-weight: 500; }
-
-/* [POP-UP (MODAL) HASIL TES] */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-overlay); z-index: 10005; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-.modal-content { background: var(--container-bg); width: 85%; max-width: 320px; border-radius: 24px; padding: 30px 20px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); animation: popIn 0.4s ease forwards; }
-@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-.modal-content h2 { font-size: 1.3rem; margin-bottom: 15px; color: var(--heading-color); }
-.modal-result { font-size: 2.2rem; font-weight: 700; color: #4C7EBF; margin-bottom: 20px;}
-.btn-share, .btn-close { width: 100%; padding: 12px; border-radius: 15px; font-weight: 600; font-family: 'Poppins', sans-serif; border: none; margin-bottom: 10px; transition: all 0.3s ease; cursor: pointer; }
-.btn-share { background: #25D366; color: white; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); }
-.btn-share:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); filter: brightness(1.05); }
-.btn-close { background: var(--circle-bg); color: var(--text-main); }
-.btn-close:hover { background: var(--border-color); }
-
+.histor
