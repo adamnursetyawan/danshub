@@ -267,3 +267,4 @@ summary::-webkit-details-marker { display: none; }
 .btn-share:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); filter: brightness(1.05); }
 .btn-close { background: var(--circle-bg); color: var(--text-main); }
 .btn-close:hover { background: var(--border-color); }
+
