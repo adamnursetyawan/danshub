@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DANS HUB</title>
+    <!-- [FONT GOOGLE: POPPINS UNTUK TEKS BIASA & SPACE MONO UNTUK ANGKA/JAM] -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <!-- [FONT AWESOME UNTUK IKON] -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- [MENGHUBUNGKAN KE FILE CSS EKSTERNAL] -->
+    <link rel="stylesheet" href="dans.css">
+    <!-- [LIBRARY SUPABASE CLOUD] -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- [KURSOR BULAT ANIMASI] -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- [TOMBOL KEMBALI KE ATAS] -->
+    <button id="back-to-top" class="control-btn" title="Kembali ke Atas">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- [TOMBOL MENGAMBANG POJOK KANAN ATAS] -->
+    <div class="floating-controls">
+        <button id="menu-btn" class="control-btn" title="Menu Navigasi">
+            <i class="fas fa-bars"></i>
+        </button>
+        <button id="theme-btn" class="control-btn" title="Ganti Tema">
+            <i class="fas fa-moon"></i>
+        </button>
+        <a href="https://karinnchans.my.id" target="_blank" class="control-btn" title="Profil Developer">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+
+    <!-- [NAVIGASI LACI (DRAWER MENU)] -->
+    <div id="side-drawer" class="side-drawer">
+        <button id="close-btn" class="close-btn"><i class="fas fa-times"></i></button>
+        <div class="drawer-nav">
+            <a href="#header" class="nav-link"><i class="fas fa-home"></i> Beranda</a>
+            <a href="#admin-widget" class="nav-link"><i class="fas fa-lock"></i> Login Admin</a>
+            <a href="#network" class="nav-link"><i class="fas fa-globe"></i> Info Jaringan</a>
+            <a href="#status-widget" class="nav-link"><i class="fas fa-server"></i> Status Layanan</a>
+            <a href="#weather-widget" class="nav-link"><i class="fas fa-cloud-sun"></i> Cuaca & Kripto</a>
+            <a href="#bookmark-widget" class="nav-link"><i class="fas fa-bookmark"></i> Bookmark</a>
+            <a href="#list-widget" class="nav-link"><i class="fas fa-tasks"></i> List</a>
+            <a href="#password-widget" class="nav-link"><i class="fas fa-key"></i> Generator Sandi</a>
+            <a href="#subnet-widget" class="nav-link"><i class="fas fa-network-wired"></i> Kalkulator Subnet</a>
+            <a href="#speedtest" class="nav-link"><i class="fas fa-tachometer-alt"></i> Speedtest</a>
+            <a href="#database-media" class="nav-link"><i class="fas fa-database"></i> Database Media</a>
+            <a href="#spotify-music" class="nav-link"><i class="fab fa-spotify"></i> Spotify</a>
+            <a href="#music" class="nav-link"><i class="fas fa-headphones"></i> Pemutar Lofi</a>
+        </div>
+    </div>
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+
+    <!-- [KONTAINER UTAMA DASBOR] -->
+    <div class="dashboard">
+        
+        <!-- [JUDUL & STATUS ONLINE] -->
+        <div class="header" id="header">
+            <h1>
+                <i class="fas fa-network-wired"></i> 
+                DANS HUB 
+                <span class="status-dot" id="network-status" title="Mengecek koneksi..."></span>
+            </h1>
+            <p>Dasbor Jaringan Pribadi</p>
+        </div>
+
+        <!-- [JAM DIGITAL] -->
+        <div class="live-clock" id="live-clock">--:--:--</div>
+
+        <!-- [WIDGET LOGIN ADMIN (SISTEM BARU)] -->
+        <div class="widget-box animate-on-scroll" id="admin-widget">
+            <div class="widget-title"><i class="fas fa-user-shield"></i> Akses Admin (Cloud)</div>
+            <div id="login-form-container">
+                <input type="email" id="admin-email" class="bm-input" placeholder="Email Admin" style="width: 100%; margin-bottom: 8px;">
+                <input type="password" id="admin-pass" class="bm-input" placeholder="Kata Sandi" style="width: 100%; margin-bottom: 8px;">
+                <button class="btn-start" style="padding: 10px; margin-bottom: 0;" onclick="loginAdmin()">Login</button>
+            </div>
+            <div id="admin-panel" style="display: none; text-align: center;">
+                <p style="color: #25D366; font-weight: bold; margin-bottom: 10px;"><i class="fas fa-check-circle"></i> Berhasil masuk sebagai Admin.</p>
+                <button class="btn-small" style="background: var(--offline-color);" onclick="logoutAdmin()">Logout</button>
+            </div>
+        </div>
+
+        <!-- [INFORMASI IP] -->
+        <div class="network-info animate-on-scroll" id="network">
+            <div><span><i class="fas fa-globe"></i> IP Publik:</span> <strong id="ip-address">Memuat...</strong></div>
+            <div><span><i class="fas fa-laptop-house"></i> IP Lokal:</span> <strong id="local-ip">Mendeteksi...</strong></div>
+            <div><span><i class="fas fa-building"></i> ISP:</span> <strong id="isp-name">Memuat...</strong></div>
+        </div>
+
+        <!-- [STATUS LAYANAN] -->
+        <div class="widget-box animate-on-scroll" id="status-widget">
+            <div class="widget-title"><i class="fas fa-server"></i> Daftar Status Layanan</div>
+            <div class="status-list" id="service-status-list">
+                <div class="status-item">
+                    <span><i class="fas fa-wifi"></i> Router Utama</span>
+                    <span class="status-badge badge-checking" id="status-router"><i class="fas fa-sync-alt fa-spin"></i> Mengecek...</span>
+                </div>
+                <div class="status-item">
+                    <span><i class="fas fa-shield-alt"></i> DNS Lokal (Pi-hole)</span>
+                    <span class="status-badge badge-checking" id="status-dns"><i class="fas fa-sync-alt fa-spin"></i> Mengecek...</span>
+                </div>
+                <div class="status-item">
+                    <span><i class="fas fa-hdd"></i> NAS Storage</span>
+                    <span class="status-badge badge-checking" id="status-nas"><i class="fas fa-sync-alt fa-spin"></i> Mengecek...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- [WIDGET CUACA LOKAL] -->
+        <div class="widget-box animate-on-scroll" id="weather-widget">
+            <div class="widget-title"><i class="fas fa-cloud-sun"></i> Widget Cuaca Lokal</div>
+            <div class="weather-content">
+                <div class="weather-info">
+                    <i class="fas fa-spinner fa-spin weather-icon" id="weather-icon"></i>
+                    <div>
+                        <div class="weather-temp" id="weather-temp">--°C</div>
+                        <div class="weather-desc" id="weather-desc">Memuat cuaca...</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-align: right;">
+                    <i class="fas fa-map-marker-alt"></i> Bekasi, ID
+                </div>
+            </div>
+        </div>
+
+        <!-- [WIDGET INFO KURS & KRIPTO MINI] -->
+        <div class="widget-box animate-on-scroll" id="crypto-widget">
+            <div class="widget-title"><i class="fas fa-chart-line"></i> Info Kurs & Kripto Mini</div>
+            <div class="crypto-grid">
+                <div class="crypto-item">
+                    <div class="crypto-item-title"><i class="fab fa-bitcoin" style="color: #f7931a;"></i> BTC</div>
+                    <span class="crypto-price" id="btc-price">Memuat...</span>
+                </div>
+                <div class="crypto-item">
+                    <div class="crypto-item-title"><i class="fab fa-ethereum" style="color: #627eea;"></i> ETH</div>
+                    <span class="crypto-price" id="eth-price">Memuat...</span>
+                </div>
+                <div class="crypto-item">
+                    <div class="crypto-item-title"><i class="fas fa-dollar-sign" style="color: #28a745;"></i> IDR/USD</div>
+                    <span class="crypto-price" id="usd-price">Memuat...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- [PENCARIAN GOOGLE & URL] -->
+        <div class="search-container animate-on-scroll">
+            <form id="search-form" onsubmit="handleSearch(event)">
+                <input type="text" id="search-input" placeholder="Cari di Google atau ketik URL" required autocomplete="off">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+
+        <!-- [PINTASAN APLIKASI] -->
+        <div class="shortcuts-container animate-on-scroll">
+            <a href="https://www.youtube.com" target="_blank" class="shortcut-btn yt" title="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.facebook.com" target="_blank" class="shortcut-btn fb" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com" target="_blank" class="shortcut-btn ig" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="http://192.168.1.254" target="_blank" class="shortcut-btn router" title="Pengaturan Router (Gateway)"><i class="fas fa-wifi"></i></a>
+        </div>
+
+        <!-- [WIDGET INFORMASI SISTEM PERANGKAT] -->
+        <div class="widget-box animate-on-scroll" id="system-info-widget">
+            <div class="widget-title"><i class="fas fa-microchip"></i> Informasi Sistem Perangkat</div>
+            <div class="status-list" id="sys-info-list">
+                <div class="status-item">
+                    <span><i class="fas fa-memory"></i> RAM Terdeteksi</span>
+                    <span style="font-family: 'Space Mono', monospace; font-weight: 700; color: #4C7EBF;" id="sys-ram">Memuat...</span>
+                </div>
+                <div class="status-item">
+                    <span><i class="fas fa-battery-half"></i> Status Baterai</span>
+                    <span style="font-family: 'Space Mono', monospace; font-weight: 700; color: #4C7EBF;" id="sys-battery">Memuat...</span>
+                </div>
+                <div class="status-item">
+                    <span><i class="fas fa-signal"></i> Tipe Koneksi</span>
+                    <span style="font-family: 'Space Mono', monospace; font-weight: 700; color: #4C7EBF;" id="sys-conn">Memuat...</span>
+                </div>
+                <div class="status-item">
+                    <span><i class="fas fa-tachometer-alt"></i> Estimasi Kecepatan</span>
+                    <span style="font-family: 'Space Mono', monospace; font-weight: 700; color: #4C7EBF;" id="sys-downlink">Memuat...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- [WIDGET PENGELOLA MARKA BUKU (BOOKMARK CLOUD)] -->
+        <div class="widget-box animate-on-scroll" id="bookmark-widget">
+            <div class="widget-title"><i class="fas fa-bookmark"></i> Manager Bookmark (Cloud)</div>
+            <form class="bm-add-form" id="bm-form" onsubmit="addBookmark(event)" style="display: none;">
+                <input type="text" id="bm-name" class="bm-input" placeholder="Nama..." required autocomplete="off">
+                <input type="url" id="bm-url" class="bm-input" placeholder="https://..." required autocomplete="off">
+                <button type="submit" class="btn-small"><i class="fas fa-plus"></i></button>
+            </form>
+            <div class="bookmark-grid" id="bookmark-list">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Memuat dari Cloud...</span>
+            </div>
+        </div>
+
+        <!-- [WIDGET DAFTAR (TO-DO CLOUD)] -->
+        <div class="widget-box animate-on-scroll" id="list-widget">
+            <div class="widget-title"><i class="fas fa-tasks"></i> List (Cloud)</div>
+            <form class="bm-add-form" id="todo-form" onsubmit="addTodo(event)" style="display: none;">
+                <input type="text" id="todo-input" class="bm-input" placeholder="Tuliskan catatan/tugas baru..." required autocomplete="off">
+                <button type="submit" class="btn-small">Tambah</button>
+            </form>
+            <ul class="todo-list" id="todo-list">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Memuat dari Cloud...</span>
+            </ul>
+        </div>
+
+        <!-- [WIDGET PEMBUAT KATA SANDI (GENERATOR)] -->
+        <div class="widget-box animate-on-scroll" id="password-widget">
+            <div class="widget-title"><i class="fas fa-key"></i> Generator Kata Sandi</div>
+            <div class="pass-box-container">
+                <input type="text" id="gen-password" class="pass-input" readonly placeholder="Klik Generate...">
+                <button class="btn-small" onclick="copyPassword()" title="Salin Kata Sandi"><i class="fas fa-copy"></i></button>
+            </div>
+            <div class="pass-controls">
+                <span style="font-weight: 600;">Panjang: <span id="pass-len-val" style="color:var(--text-main);">16</span></span>
+                <input type="range" id="pass-length" min="8" max="32" value="16" oninput="document.getElementById('pass-len-val').innerText = this.value">
+                <button class="btn-small" onclick="generatePassword()">Generate Ulang</button>
+            </div>
+        </div>
+
+        <!-- [WIDGET KALKULATOR SUBNET] -->
+        <div class="widget-box animate-on-scroll" id="subnet-widget">
+            <div class="widget-title"><i class="fas fa-calculator"></i> Kalkulator Subnet</div>
+            <div class="subnet-grid">
+                <input type="text" id="sub-ip" class="bm-input" placeholder="IP (ex: 192.168.1.1)" autocomplete="off">
+                <input type="number" id="sub-cidr" class="bm-input" placeholder="/24" min="1" max="32">
+                <button class="btn-small" onclick="calculateSubnet()">Hitung</button>
+            </div>
+            <div class="subnet-result" id="subnet-result">
+                <!-- [HASIL PERHITUNGAN KALKULATOR SUBNET] -->
+            </div>
+        </div>
+
+        <!-- [UJI KECEPATAN (SPEEDTEST)] -->
+        <div class="server-selector animate-on-scroll" id="speedtest">
+            <label><i class="fas fa-satellite-dish"></i> Pilih Server Pengujian:</label>
+            <select id="server-select">
+                <option value="Jkt-Telkom">Jakarta, ID - Telkom</option>
+                <option value="Sgp-DO">Singapore, SG - Digital Ocean</option>
+                <option value="Bks-Karin">Bekasi, ID - DANSHUB</option>
+            </select>
+        </div>
+
+        <div class="speed-circle animate-on-scroll" id="speed-circle">
+            <div class="speed-value-container">
+                <span class="status-text" id="status-text">Siap</span>
+                <span class="speed-value" id="main-speed">0.0</span>
+                <span class="speed-unit">Mbps</span>
+            </div>
+        </div>
+
+        <div class="stats-grid animate-on-scroll">
+            <div class="stat-box">
+                <i class="fas fa-arrow-down stat-icon"></i>
+                <span class="stat-label">Unduh</span>
+                <span class="stat-val"><span id="dl-val">--</span></span>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-arrow-up stat-icon"></i>
+                <span class="stat-label">Unggah</span>
+                <span class="stat-val"><span id="ul-val">--</span></span>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-bolt stat-icon"></i>
+                <span class="stat-label">Ping</span>
+                <span class="stat-val"><span id="ping-val">--</span></span>
+            </div>
+        </div>
+
+        <button class="btn-start animate-on-scroll" id="start-btn" onclick="startSpeedTest()">Mulai Uji Kecepatan</button>
+
+        <details class="animate-on-scroll" id="history">
+            <summary>
+                <span>Riwayat Pengujian</span>
+                <div class="summary-actions">
+                    <button class="btn-clear" onclick="clearHistory(event)" title="Hapus Riwayat">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </summary>
+            <ul class="history-list" id="history-ul">
+                <li id="empty-history" style="text-align:center; border:none;">Belum ada riwayat tes.</li>
+            </ul>
+        </details>
+
+        <!-- [WIDGET COLOR PICKER] -->
+        <div class="widget-box animate-on-scroll" id="color-picker-widget">
+            <div class="widget-title"><i class="fas fa-palette"></i> Color Picker</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="color" id="color-input" value="#4C7EBF" style="width: 50px; height: 50px; border: none; border-radius: 8px; cursor: pointer; background: transparent; padding: 0;">
+                <input type="text" id="color-hex" class="bm-input" value="#4C7EBF" readonly style="font-family: 'Space Mono', monospace; font-weight: bold; text-transform: uppercase;">
+                <button class="btn-small" onclick="copyColorPicker()" title="Salin Warna"><i class="fas fa-copy"></i></button>
+            </div>
+        </div>
+
+        <!-- [WIDGET DATABASE MEDIA CLOUD] -->
+        <div class="widget-box drive-widget animate-on-scroll" id="database-media" style="padding: 15px;">
+            <div class="widget-title"><i class="fas fa-database"></i> Database Media Cloud</div>
+            <form id="upload-media-form" class="bm-add-form" onsubmit="uploadMedia(event)" style="display: none;">
+                <input type="file" id="media-file" class="bm-input" accept="image/*,video/*,audio/*" required>
+                <button type="submit" class="btn-small" id="upload-btn"><i class="fas fa-upload"></i> Unggah</button>
+            </form>
+            <div id="media-gallery" class="media-gallery">
+                <span style="font-size:0.8rem; color:var(--text-muted); grid-column: 1 / -1; text-align:center;">Memuat media dari Cloud...</span>
+            </div>
+        </div>
+
+        <!-- [WIDGET SPOTIFY PLAYLIST] -->
+        <div class="widget-box animate-on-scroll" id="spotify-music" style="padding: 15px;">
+            <div class="widget-title"><i class="fab fa-spotify"></i> Musik</div>
+            <div class="spotify-container">
+                <iframe style="border-radius:12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);" 
+                    src="https://open.spotify.com/embed/playlist/4ZdHBOgN4UAVpw7J5uZPux?utm_source=generator&theme=0" 
+                    width="100%" height="152" frameBorder="0" allowfullscreen="" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- [WIDGET PEMUTAR LOFI] -->
+        <div class="widget-box animate-on-scroll" id="music" style="padding: 15px;">
+            <div class="widget-title"><i class="fas fa-headphones"></i> Pemutar Lofi</div>
+            <div class="spotify-container">
+                <iframe style="border-radius:12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);" 
+                    src="https://www.youtube.com/embed/X4VbdwhkE10" 
+                    width="100%" height="220" frameBorder="0" allowfullscreen="" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- [INFO DETEKSI OS & BROWSER] -->
+        <div class="device-info animate-on-scroll" id="device-info">
+            <i class="fas fa-microchip"></i> Mendeteksi perangkat...
+        </div>
+
+    </div>
+
+    <!-- [MODAL (POP-UP) HASIL TES] -->
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <h2> Tes Selesai!</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Kecepatan Unduh Anda:</p>
+            <div class="modal-result"><span id="modal-dl">0</span> <span style="font-size:1rem;">Mbps</span></div>
+            <button class="btn-share" onclick="shareResult()"><i class="fab fa-whatsapp"></i> Bagikan ke Whatsapp</button>
+            <button class="btn-close" onclick="closeModal()">Tutup Jendela</button>
+        </div>
+    </div>
+
+    <!-- [MENGHUBUNGKAN KE FILE JAVASCRIPT EKSTERNAL] -->
+    <script src="dans.js"></script>
+</body>
+</html>
